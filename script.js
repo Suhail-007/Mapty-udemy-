@@ -20,17 +20,25 @@ const inputElevation = document.querySelector('.form__input--elevation');
 		const coords = [latitude, longitude];
 		
 		const map = L.map('map').setView(coords, 13);
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
-
-L.marker(coords).addTo(map)
-    .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-    .openPopup();
+    
+    
+  //click event on map
+		map.on('click', function (mapEvent) {
+				const {lat,lng} = mapEvent.latlng;
+				
+				//add marker
+				L.marker(lat, lng).addTo(map)
+				.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+				.openPopup();
+		})
 }, function () {
 		alert('couldn\'t get your location')
 		}
 )	
+
 }
 
 showPos();
