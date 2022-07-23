@@ -30,7 +30,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 				const {lat,lng} = mapEvent.latlng;
 				
 				//add marker
-				L.marker(lat, lng).addTo(map)
+				L.marker([lat, lng]).addTo(map)
 				.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
 				.openPopup();
 		})
