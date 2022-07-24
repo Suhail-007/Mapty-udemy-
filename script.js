@@ -36,7 +36,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 						minWidth: 50,
 						autoClose: false,
 						closeOnClick: false,
-						className: '.running-popup',
+						className: 'running-popup',
 				})
 				)
 				.setPopupContent('Workout')
