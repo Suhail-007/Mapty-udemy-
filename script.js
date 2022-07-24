@@ -31,7 +31,14 @@ const inputElevation = document.querySelector('.form__input--elevation');
 				
 				//add marker
 				L.marker([lat, lng]).addTo(map)
-				.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+				.bindPopup(L.popUp{
+						maxWidth: 200,
+						minWidth: 50,
+						autoClose: false,
+						closeOnClick: false,
+						className: '.running-popup',
+				})
+				.setPopupContent('Workout')
 				.openPopup();
 		})
 }, function () {
