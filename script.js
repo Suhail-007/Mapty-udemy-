@@ -3,16 +3,23 @@
 class Workout {
   date = new Date();
   id = (Date.now() + '').slice(-10);
+
+
   months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   constructor(coords, distance, duration) {
     this.coords = coords;
     this.distance = distance; // km
     this.duration = duration; // min
+    this.clicks = 0;
   }
 
   _setDescription() {
-    this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${this.months[this.date.getMonth()]} ${this.date.getDay()}`
+    this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${this.months[this.date.getMonth()]} ${this.date.getDate()}`
+  }
+
+  click() {
+    return this.clicks++
   }
 }
 
@@ -48,10 +55,8 @@ class Cycling extends Workout {
   }
 }
 
-//const run = new Running ([21, -16], 20, 234)
+//const run = new Running([21, -16], 20, 234)
 //console.log(run)
-
-
 
 const form = document.querySelector('.form');
 const containerWorkouts = document.querySelector('.workouts');
@@ -75,7 +80,7 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToMap.bind(this));
-
+    this._getLocalStorage();
   }
 
   _getPosition() {
@@ -96,7 +101,10 @@ class App {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(this.#map);
     //click event on map
-    this.#map.on('click', this._showForm.bind(this))
+    this.#map.on('click', this._showForm.bind(this));
+
+    //render marker from localStorage
+    this.#workouts.forEach(work => this._renderWorkoutMarker(work));
   }
 
   _showForm(mapE) {
@@ -104,6 +112,7 @@ class App {
     //remove class	
     form.classList.remove('hidden');
     inputDistance.focus();
+
   }
 
   _hideForm() {
@@ -163,7 +172,10 @@ class App {
     this._renderWorkout(workout);
 
     //Hide the form + clear the input fields		
-    this._hideForm()
+    this._hideForm();
+
+    //set local storage
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -232,21 +244,41 @@ class App {
 
   _moveToMap(e) {
     const workoutEl = e.target.closest('.workout');
-    
-    if(!workoutEl) return
-    
+
+    if (!workoutEl) return
+
     const workout = this.#workouts.find(work => work.id === workoutEl.dataset.id);
-    
-    
-    
+
+
+
     this.#map.setView(workout.coords, this.#mapZoomLevel, {
       animate: true,
       pan: {
         duration: 1
       }
     })
-    
+    //    workout.click();
+  }
+
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+
+    if (!data) return;
+    console.log(data);
+
+    this.#workouts = data;
+
+    this.#workouts.forEach(work => this._renderWorkout(work));
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
   }
 }
+
 //class instance
 const app = new App()
