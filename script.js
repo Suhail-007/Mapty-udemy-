@@ -65,21 +65,34 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
-
-
-
+const sortWrapper = document.querySelector('[data-sortWrapper]');
+const sortBtn = document.querySelector('[data-sortCont]');
+const sortList = document.querySelector('[data-sortList]');
 /////////////////////////////////////////////
 //APPLICATION ARCHITECTURE
 class App {
+  #elemId;
+  #html;
   #map;
   #mapEvent;
   #workouts = [];
   #mapZoomLevel = 13;
   constructor() {
+
+    //get position
     this._getPosition();
+
+    //unhide sort btn if workouts exist in local storage
+    this._showSortBtn();
+
+    //Event listeners
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToMap.bind(this));
+    sortBtn.addEventListener('click', this._showSortOptions);
+    sortList.addEventListener('click', this._getSortType.bind(this));
+
+    //get workout from local storage
     this._getLocalStorage();
   }
 
@@ -100,6 +113,7 @@ class App {
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(this.#map);
+
     //click event on map
     this.#map.on('click', this._showForm.bind(this));
 
@@ -109,18 +123,32 @@ class App {
 
   _showForm(mapE) {
     this.#mapEvent = mapE;
+
     //remove class	
     form.classList.remove('hidden');
     inputDistance.focus();
 
+    sortWrapper.classList.remove('hidden');
   }
-
+  
   _hideForm() {
     inputDistance.value = inputDuration.value = inputElevation.value = inputCadence.value = '';
 
     form.style.display = 'none';
     form.classList.add('hidden');
     setTimeout(() => form.style.display = 'grid', 1000);
+  }
+
+  _showSortBtn() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    if (!data) return
+    if (data.length !== 0) sortWrapper.classList.remove('hidden');
+  }
+
+  _showSortOptions(e) {
+    const sort = e.target.classList.contains('sort-cont');
+
+    if (sort) sortList.classList.toggle('hidden');
   }
 
   _toggleElevationField() {
@@ -163,7 +191,6 @@ class App {
 
     //add new object to workout arrray;
     this.#workouts.push(workout);
-    console.log(this.#workouts);
 
     //Render workout as an marker on map		
     this._renderWorkoutMarker(workout);
@@ -192,7 +219,7 @@ class App {
   }
 
   _renderWorkout(workout) {
-    let html = `
+    this.#html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
           <h2 class="workout__title">${workout.description}</h2>
           <div class="workout__details">
@@ -208,7 +235,7 @@ class App {
     `
 
     if (workout.type === 'running') {
-      html += `
+      this.#html += `
         <div class="workout__details">
           <span class="workout__icon">⚡️</span>
           <span class="workout__value">${workout.pace.toFixed(1)}</span>
@@ -224,7 +251,7 @@ class App {
     }
 
     if (workout.type === 'cycling') {
-      html += `
+      this.#html += `
        <div class="workout__details">
             <span class="workout__icon">⚡️</span>
             <span class="workout__value">${workout.speed.toFixed(1)}</span>
@@ -239,7 +266,7 @@ class App {
       `
     }
 
-    form.insertAdjacentHTML('afterend', html);
+    form.insertAdjacentHTML('afterend', this.#html);
   }
 
   _moveToMap(e) {
@@ -260,25 +287,72 @@ class App {
     //    workout.click();
   }
 
-  _setLocalStorage() {
-    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  _getSortType(e) {
+    this.#elemId = e.target.id;
+    this._sortWorkoutList(this.#elemId);
   }
-
-  _getLocalStorage() {
-    const data = JSON.parse(localStorage.getItem('workouts'));
-
-    if (!data) return;
-    console.log(data);
-
-    this.#workouts = data;
-
-    this.#workouts.forEach(work => this._renderWorkout(work));
+  
+  _sortWorkoutList(elemId) {
+    let sortedArr;
+    const formList = document.querySelectorAll('.workout');
+    
+    if (elemId === 'alphabetically') {
+      sortedArr = this.#workouts.slice().sort((a, b) => {
+        const nameA = a.type.toLowerCase();
+        const nameB = b.type.toLowerCase();
+        
+        if (nameA > nameB) return -1;
+        if(nameA < nameB) return 1;
+      })
+    }
+    
+    if (elemId === 'duration') {
+      sortedArr = this.#workouts.slice().sort((a, b) => {
+        if (a.duration > b.duration) return -1;
+        if(a.duration < b.duration) return 1;
+      })
+    }
+    
+    if (elemId === 'distance') {
+      sortedArr = this.#workouts.slice().sort((a, b) => {
+        if (a.distance > b.distance) return -1;
+        if(a.distance < b.distance) return 1;
+      })
+    } 
+    
+    //clear the form
+    formList.forEach(li => li.style.display = li.remove());
+    
+    //render sorted array on form
+    sortedArr.forEach(work => this._renderWorkout(work));
+    
+    //hide btn as soon as user click on any sort option 
+    sortList.classList.add('hidden');
+    setTimeout(function () {
+      sortList.style.display = 'block';
+    }, 500);
+    
+    console.log(sortedArr);
   }
+  
+_setLocalStorage() {
+  localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+}
 
-  reset() {
-    localStorage.removeItem('workouts');
-  }
+_getLocalStorage() {
+  const data = JSON.parse(localStorage.getItem('workouts'));
+
+  if (!data) return;
+
+  this.#workouts = data;
+
+  this.#workouts.forEach(work => this._renderWorkout(work));
+}
+
+reset() {
+  localStorage.removeItem('workouts');
+}
 }
 
 //class instance
-const app = new App()
+const app = new App();

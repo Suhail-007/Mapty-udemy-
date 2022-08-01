@@ -77,9 +77,11 @@ a:visited {
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 0.75rem 1.5rem;
 }
+
 .workout--running {
   border-left: 5px solid var(--color-brand--2);
 }
+
 .workout--cycling {
   border-left: 5px solid var(--color-brand--1);
 }
@@ -215,6 +217,52 @@ a:visited {
 .running-popup .leaflet-popup-content-wrapper {
   border-left: 5px solid var(--color-brand--2);
 }
+
 .cycling-popup .leaflet-popup-content-wrapper {
   border-left: 5px solid var(--color-brand--1);
+}
+
+/*My Styles github@Suhail-007*/
+.sort-wrapper {
+  position: relative;
+}
+
+.sort-wrapper.hidden {
+  display: none;
+}
+
+.sort-cont {
+  font-size: 2.5em;
+  user-select: none;
+}
+
+.sort-list {
+  display: block;
+  position: absolute;
+  bottom: -100;
+  transition: height 0.5s, transform 0.5s, font-size 0.5s, font-weight 0.5s;
+  opacity: 1;
+  width:8em;
+  height: 6em;
+  background: #fff;
+  color: #000;
+  pointer-events: auto;
+  user-select: none;
+  border-radius: 0.2em;
+  padding: 0.2em 0.5em;
+  font-size: 2em;
+  z-index: 2;
+}
+
+.sort-list > p:hover, 
+.sort-list > p:focus {
+  transform: scale(1.1);
+  font-weight: bold;
+}
+
+.sort-list.hidden {
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  height: 0;
 }
