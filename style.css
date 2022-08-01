@@ -237,13 +237,19 @@ a:visited {
 }
 
 .sort-list {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
   position: absolute;
   bottom: -100;
-  transition: height 0.5s, transform 0.5s, font-size 0.5s, font-weight 0.5s;
+  transition: height 0.5s,
+    transform 0.5s,
+    font-size 0.5s,
+    font-weight 0.5s,
+    opacity 0.5s;
   opacity: 1;
-  width:8em;
-  height: 6em;
+  width: 8em;
+  height: 8em;
   background: #fff;
   color: #000;
   pointer-events: auto;
@@ -254,8 +260,8 @@ a:visited {
   z-index: 2;
 }
 
-.sort-list > p:hover, 
-.sort-list > p:focus {
+.sort-list>p:hover,
+.sort-list>p:focus {
   transform: scale(1.1);
   font-weight: bold;
 }

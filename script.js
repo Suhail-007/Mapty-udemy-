@@ -296,6 +296,10 @@ class App {
     let sortedArr;
     const formList = document.querySelectorAll('.workout');
     
+    if(!elemId) return
+    
+    if (elemId === 'default') sortedArr = this.#workouts.slice();
+    
     if (elemId === 'alphabetically') {
       sortedArr = this.#workouts.slice().sort((a, b) => {
         const nameA = a.type.toLowerCase();
@@ -329,7 +333,7 @@ class App {
     //hide btn as soon as user click on any sort option 
     sortList.classList.add('hidden');
     setTimeout(function () {
-      sortList.style.display = 'block';
+      sortList.style.display = 'flex';
     }, 500);
     
     console.log(sortedArr);
