@@ -1,2 +1,2 @@
 # Mapty-udemy 
-Udemy Project 
+Udemy Project by Jonas Schmedtmann.

@@ -72,7 +72,7 @@ a:visited {
   padding: 1.5rem 2.25rem;
   margin-bottom: 1.75rem;
   cursor: pointer;
-
+ 
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 0.75rem 1.5rem;
@@ -223,6 +223,13 @@ a:visited {
 }
 
 /*My Styles github@Suhail-007*/
+.btns {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
 .sort-wrapper {
   position: relative;
 }
@@ -237,6 +244,12 @@ a:visited {
 }
 
 .sort-list {
+  width: 8em;
+  height: 8em;
+}
+
+.sort-list,
+.delete-list {
   display: flex;
   flex-direction: column;
   justify-items: center;
@@ -248,8 +261,6 @@ a:visited {
     font-weight 0.5s,
     opacity 0.5s;
   opacity: 1;
-  width: 8em;
-  height: 8em;
   background: #fff;
   color: #000;
   pointer-events: auto;
@@ -266,9 +277,67 @@ a:visited {
   font-weight: bold;
 }
 
-.sort-list.hidden {
+.sort-list.hidden,
+.delete-list.hidden {
   opacity: 0;
   pointer-events: none;
   user-select: none;
   height: 0;
+}
+
+.workout {
+  position: relative;
+}
+
+/*Cross Btn styles*/
+.crossWrapper {
+  position: absolute;
+  top: -23%;
+  right: 0;
+  opacity: 1;
+  transition: opacity 0.5s;
+  user-select: none;
+  pointer-events: auto ;
+}
+
+.crossBtn {
+  font-size: 4em;
+  z-index: 3;
+}
+
+.crossWrapper.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/*Delete btn and option*/
+.deleteBtn-Cont {
+  opacity: 1;
+  transition: 0.3s ease-in-out;
+  pointer-events: auto ;
+  user-select: none;
+}
+
+.deleteBtn-Cont.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+.delete-btn {
+  font-size: 2em;
+  position :relative;
+  padding: 0.3em 0.5em;
+  border: 2px solid white;
+  transition: 0.1s ease-in-out;
+  user-select: none;
+}
+
+.delete-btn:focus,
+.delete-btn:hover {
+  transform: translateY(-1%)
+}
+
+.delete-list {
+  height: 4em;
 }
