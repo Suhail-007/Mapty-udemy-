@@ -68,6 +68,8 @@ const inputElevation = document.querySelector('.form__input--elevation');
 const btnsCont = document.querySelector('#btns');
 const sortBtn = document.querySelector('[data-sortCont]');
 const sortList = document.querySelector('[data-sortList]');
+const deleteList = document.querySelector('[data-deleteList]');
+
 /////////////////////////////////////////////
 //APPLICATION ARCHITECTURE
 class App {
@@ -90,9 +92,8 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToMap.bind(this));
     btnsCont.addEventListener('click', this._openList)
-    //sortBtn.addEventListener('click', this._showSortOptions);
-    sortList.addEventListener('click', this._getSortType.bind(this));
-
+    sortList.addEventListener('click', this._getOptionType.bind(this));
+    deleteList.addEventListener('click', this._getOptionType.bind(this));
     //get workout from local storage
     this._getLocalStorage();
   }
@@ -139,25 +140,6 @@ class App {
     form.style.display = 'none';
     form.classList.add('hidden');
     setTimeout(() => form.style.display = 'grid', 1000);
-  }
-
-  _showBtns() {
-    const data = JSON.parse(localStorage.getItem('workouts'));
-    if (!data) return
-    if (data.length !== 0) btnsCont.classList.remove('hidden');
-  }
-
-  _openList(e) {
-   let listOptions;
-   
-    const btn = e.target.dataset.sortcont === 'sort-list' ? e.target.dataset.sortcont :  e.target.dataset.deletebtn;
-    
-    if (!btn) return;
-    
-    if (btn) {
-      listOptions = document.querySelector(`.${btn}`);
-      listOptions.classList.toggle('hidden');
-    }
   }
 
   _toggleElevationField() {
@@ -232,9 +214,13 @@ class App {
     
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
     
+    <!----Added by github@suhail-007---->
+    
       <div class="crossWrapper hidden">
         <div class="crossBtn">×</div>
       </div>
+  
+    <!----Added by github@suhail-007----> 
      
       <h2 class="workout__title">${workout.description}</h2>
       <div class="workout__details">
@@ -301,20 +287,50 @@ class App {
     })
     //    workout.click();
   }
+  
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+  
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+  
+    if (!data) return;
+  
+    this.#workouts = data;
+  
+    this.#workouts.forEach(work => this._renderWorkout(work));
+  }
+  
+  reset() {
+    localStorage.removeItem('workouts');
+  }
 
-  _getSortType(e) {
+  //Added by github@suhail-007
+  _getOptionType(e) {
+   
+  if(e.target.parentElement.matches('.delete-list')) {
+    this.#elemId = e.target.id;
+    this._showDeleteBtns(this.#elemId);
+  }
+  
+  if(e.target.parentElement.matches('.sort-list')) {
     this.#elemId = e.target.id;
     this._sortWorkoutList(this.#elemId);
   }
+  
+  }
 
   _sortWorkoutList(elemId) {
-    let sortedArr;
     const formList = document.querySelectorAll('.workout');
-
+    let sortedArr;
+    
     if (!elemId) return
-
+    
+    //default order of the list
     if (elemId === 'default') sortedArr = this.#workouts.slice();
-
+    
+    //alphabetical order
     if (elemId === 'alphabetically') {
       sortedArr = this.#workouts.slice().sort((a, b) => {
         const nameA = a.type.toLowerCase();
@@ -324,14 +340,16 @@ class App {
         if (nameA < nameB) return 1;
       })
     }
-
+    
+    // duration in ascending order
     if (elemId === 'duration') {
       sortedArr = this.#workouts.slice().sort((a, b) => {
         if (a.duration > b.duration) return -1;
         if (a.duration < b.duration) return 1;
       })
     }
-
+    
+    //distance in ascending order
     if (elemId === 'distance') {
       sortedArr = this.#workouts.slice().sort((a, b) => {
         if (a.distance > b.distance) return -1;
@@ -339,11 +357,11 @@ class App {
       })
     }
 
-    //clear the form
-    formList.forEach(li => li.style.display = li.remove());
-
     //render sorted array on form
     sortedArr.forEach(work => this._renderWorkout(work));
+    
+    //clear the form
+    formList.forEach(li => li.style.display = li.remove());
 
     //hide btn as soon as user click on any sort option
     sortList.classList.add('hidden');
@@ -353,24 +371,48 @@ class App {
       sortList.style.display = 'flex';
     }, 500);
   }
-
-  _setLocalStorage() {
-    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
-  }
-
-  _getLocalStorage() {
+  
+  _showBtns() {
     const data = JSON.parse(localStorage.getItem('workouts'));
-
-    if (!data) return;
-
-    this.#workouts = data;
-
-    this.#workouts.forEach(work => this._renderWorkout(work));
+    if (!data) return
+    if (data.length !== 0) btnsCont.classList.remove('hidden');
   }
 
-  reset() {
-    localStorage.removeItem('workouts');
+  _openList(e) {
+   let listOptions;
+   
+    const btn = e.target.dataset.sortcont === 'sort-list' ? e.target.dataset.sortcont :  e.target.dataset.deletebtn;
+    
+    if (!btn) return;
+    
+    if (btn) {
+      listOptions = document.querySelector(`.${btn}`);
+      listOptions.classList.toggle('hidden');
+    }
   }
+  
+  _showDeleteBtns(elemId) {
+    const formList = document.querySelectorAll('.workout');
+    const crossBtnWrapper = document.querySelectorAll('.crossWrapper');
+    
+    console.log(elemId);
+    if (elemId === 'delete') {
+      
+      crossBtnWrapper.forEach(btn => btn.classList.remove('hidden'));
+   }
+    
+    if (elemId === 'deleteAll') {
+      //clear local storage
+      this.reset()
+      //clear form lists
+      formList.forEach(li => li.style.display = li.remove());
+      btnsCont.classList.add('hidden');
+    }
+    
+    deleteList.classList.add('hidden');
+  }
+  
+  //Added by github@suhail-007
 }
 
 //class instance

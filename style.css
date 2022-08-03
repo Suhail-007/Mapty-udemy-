@@ -273,8 +273,10 @@ a:visited {
   z-index: 2;
 }
 
-.sort-list>p:hover,
-.sort-list>p:focus {
+.sort-list > p:hover,
+.sort-list > p:focus,
+.delete-list > p:hover,
+.delete-list > p:focus {
   transform: scale(1.1);
   font-weight: bold;
 }
