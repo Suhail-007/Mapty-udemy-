@@ -24,10 +24,10 @@
     <img src="logo.png" alt="Logo" class="logo" />
   <ul class="workouts">
     
-        <!-- Added by github@Suhail-007--->
-    <div class="btns">
-      <div class="sort-wrapper hidden" data-sortWrapper>
-        <div class="sort-cont" data-sortCont>Sort</div>
+   <!-- Added by github@Suhail-007--->
+    <div class="btns hidden" id="btns">
+      <div class="sort-wrapper" data-sortWrapper>
+        <div class="sort-cont" id="sort" data-sortCont="sort-list">Sort</div>
         <div class="sort-list hidden" data-sortList>
           <p id="default">Default</p>
           <p id="alphabetically">Alphabetically</p>
@@ -36,8 +36,8 @@
         </div>
       </div>
 
-      <div class="deleteBtn-Cont hidden">
-        <div class="delete-btn" data-deleteBtn>Delete</div>
+      <div data-deleteBtnCont class="deleteBtn-Cont">
+        <div class="delete-btn" id="deleteBtn" data-deleteBtn="delete-list">Delete</div>
         <div class="delete-list hidden" data-deleteList>
           <p id="delete">Delete</p>
           <p id="deleteAll">Delete All</p>
@@ -73,39 +73,6 @@
       </div>
       <button class="form__btn">OK</button>
     </form>
-
-
-    <li class="workout workout--running" data-id="${workout.id}">
-
-      <!-- Added by github@Suhail-007--->
-      <!--Delete btn on workout list-->
-      <div class="crossWrapper hidden">
-        <div data-crossBtn class="crossBtn">×</div>
-      </div>
-      <!-- Added by github@Suhail-007--->
-
-      <h2 class="workout__title">Running on August 2</h2>
-      <div class="workout__details">
-        <span class="workout__icon">🏃</span>
-        <span class="workout__value">90</span>
-        <span class="workout__unit">km</span>
-      </div>
-      <div class="workout__details">
-        <span class="workout__icon">⏱</span>
-        <span class="workout__value">50</span>
-        <span class="workout__unit">min</span>
-      </div>
-      <div class="workout__details">
-        <span class="workout__icon">⚡️</span>
-        <span class="workout__value">40</span>
-        <span class="workout__unit">min/km</span>
-      </div>
-      <div class="workout__details">
-        <span class="workout__icon">🦶🏼</span>
-        <span class="workout__value">50</span>
-        <span class="workout__unit">spm</span>
-      </div>
-    </li>
   </ul>
 
   <p class="copyright">

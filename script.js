@@ -65,7 +65,7 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
-const sortWrapper = document.querySelector('[data-sortWrapper]');
+const btnsCont = document.querySelector('#btns');
 const sortBtn = document.querySelector('[data-sortCont]');
 const sortList = document.querySelector('[data-sortList]');
 /////////////////////////////////////////////
@@ -82,14 +82,15 @@ class App {
     //get position
     this._getPosition();
 
-    //unhide sort btn if workouts exist in local storage
-    this._showSortBtn();
+    //unhide sort and delete btns if workouts exist in local storage
+    this._showBtns();
 
     //Event listeners
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToMap.bind(this));
-    sortBtn.addEventListener('click', this._showSortOptions);
+    btnsCont.addEventListener('click', this._openList)
+    //sortBtn.addEventListener('click', this._showSortOptions);
     sortList.addEventListener('click', this._getSortType.bind(this));
 
     //get workout from local storage
@@ -127,10 +128,11 @@ class App {
     //remove class	
     form.classList.remove('hidden');
     inputDistance.focus();
-
-    sortWrapper.classList.remove('hidden');
+    
+    //Added by GitHub@suhail-007
+    btnsCont.classList.remove('hidden');
   }
-  
+
   _hideForm() {
     inputDistance.value = inputDuration.value = inputElevation.value = inputCadence.value = '';
 
@@ -139,16 +141,23 @@ class App {
     setTimeout(() => form.style.display = 'grid', 1000);
   }
 
-  _showSortBtn() {
+  _showBtns() {
     const data = JSON.parse(localStorage.getItem('workouts'));
     if (!data) return
-    if (data.length !== 0) sortWrapper.classList.remove('hidden');
+    if (data.length !== 0) btnsCont.classList.remove('hidden');
   }
 
-  _showSortOptions(e) {
-    const sort = e.target.classList.contains('sort-cont');
-
-    if (sort) sortList.classList.toggle('hidden');
+  _openList(e) {
+   let listOptions;
+   
+    const btn = e.target.dataset.sortcont === 'sort-list' ? e.target.dataset.sortcont :  e.target.dataset.deletebtn;
+    
+    if (!btn) return;
+    
+    if (btn) {
+      listOptions = document.querySelector(`.${btn}`);
+      listOptions.classList.toggle('hidden');
+    }
   }
 
   _toggleElevationField() {
@@ -220,18 +229,24 @@ class App {
 
   _renderWorkout(workout) {
     this.#html = `
+    
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
-          <h2 class="workout__title">${workout.description}</h2>
-          <div class="workout__details">
-            <span class="workout__icon">${workout.type === 'running' ? '🏃' : '🚴'}</span>
-            <span class="workout__value">${workout.distance}</span>
-            <span class="workout__unit">km</span>
-          </div>
-          <div class="workout__details">
-            <span class="workout__icon">⏱</span>
-            <span class="workout__value">${workout.duration}</span>
-            <span class="workout__unit">min</span>
-          </div>
+    
+      <div class="crossWrapper hidden">
+        <div class="crossBtn">×</div>
+      </div>
+     
+      <h2 class="workout__title">${workout.description}</h2>
+      <div class="workout__details">
+        <span class="workout__icon">${workout.type === 'running' ? '🏃' : '🚴'}</span>
+        <span class="workout__value">${workout.distance}</span>
+        <span class="workout__unit">km</span>
+      </div>
+      <div class="workout__details">
+        <span class="workout__icon">⏱</span>
+        <span class="workout__value">${workout.duration}</span>
+        <span class="workout__unit">min</span>
+      </div>
     `
 
     if (workout.type === 'running') {
@@ -252,17 +267,17 @@ class App {
 
     if (workout.type === 'cycling') {
       this.#html += `
-       <div class="workout__details">
-            <span class="workout__icon">⚡️</span>
-            <span class="workout__value">${workout.speed.toFixed(1)}</span>
-            <span class="workout__unit">km/h</span>
-          </div>
-          <div class="workout__details">
-            <span class="workout__icon">⛰</span>
-            <span class="workout__value">${workout.elevationGain}</span>
-            <span class="workout__unit">m</span>
-          </div>
-        </li>
+        <div class="workout__details">
+          <span class="workout__icon">⚡️</span>
+          <span class="workout__value">${workout.speed.toFixed(1)}</span>
+          <span class="workout__unit">km/h</span>
+        </div>
+        <div class="workout__details">
+          <span class="workout__icon">⛰</span>
+          <span class="workout__value">${workout.elevationGain}</span>
+          <span class="workout__unit">m</span>
+        </div>
+      </li>
       `
     }
 
@@ -291,71 +306,71 @@ class App {
     this.#elemId = e.target.id;
     this._sortWorkoutList(this.#elemId);
   }
-  
+
   _sortWorkoutList(elemId) {
     let sortedArr;
     const formList = document.querySelectorAll('.workout');
-    
-    if(!elemId) return
-    
+
+    if (!elemId) return
+
     if (elemId === 'default') sortedArr = this.#workouts.slice();
-    
+
     if (elemId === 'alphabetically') {
       sortedArr = this.#workouts.slice().sort((a, b) => {
         const nameA = a.type.toLowerCase();
         const nameB = b.type.toLowerCase();
-        
+
         if (nameA > nameB) return -1;
-        if(nameA < nameB) return 1;
+        if (nameA < nameB) return 1;
       })
     }
-    
+
     if (elemId === 'duration') {
       sortedArr = this.#workouts.slice().sort((a, b) => {
         if (a.duration > b.duration) return -1;
-        if(a.duration < b.duration) return 1;
+        if (a.duration < b.duration) return 1;
       })
     }
-    
+
     if (elemId === 'distance') {
       sortedArr = this.#workouts.slice().sort((a, b) => {
         if (a.distance > b.distance) return -1;
-        if(a.distance < b.distance) return 1;
+        if (a.distance < b.distance) return 1;
       })
-    } 
-    
+    }
+
     //clear the form
     formList.forEach(li => li.style.display = li.remove());
-    
+
     //render sorted array on form
     sortedArr.forEach(work => this._renderWorkout(work));
-    
-    //hide btn as soon as user click on any sort option 
+
+    //hide btn as soon as user click on any sort option
     sortList.classList.add('hidden');
-    setTimeout(function () {
+    
+    //this will preserve the animation
+    setTimeout(function() {
       sortList.style.display = 'flex';
     }, 500);
-    
-    console.log(sortedArr);
   }
-  
-_setLocalStorage() {
-  localStorage.setItem('workouts', JSON.stringify(this.#workouts));
-}
 
-_getLocalStorage() {
-  const data = JSON.parse(localStorage.getItem('workouts'));
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
 
-  if (!data) return;
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
 
-  this.#workouts = data;
+    if (!data) return;
 
-  this.#workouts.forEach(work => this._renderWorkout(work));
-}
+    this.#workouts = data;
 
-reset() {
-  localStorage.removeItem('workouts');
-}
+    this.#workouts.forEach(work => this._renderWorkout(work));
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+  }
 }
 
 //class instance

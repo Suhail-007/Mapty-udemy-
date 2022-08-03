@@ -72,7 +72,7 @@ a:visited {
   padding: 1.5rem 2.25rem;
   margin-bottom: 1.75rem;
   cursor: pointer;
- 
+
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 0.75rem 1.5rem;
@@ -228,14 +228,18 @@ a:visited {
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
+  opacity: 1;
+  transition: opacity 1s;
+  pointer-events: auto;
+}
+
+.btns.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .sort-wrapper {
   position: relative;
-}
-
-.sort-wrapper.hidden {
-  display: none;
 }
 
 .sort-cont {
@@ -263,8 +267,6 @@ a:visited {
   opacity: 1;
   background: #fff;
   color: #000;
-  pointer-events: auto;
-  user-select: none;
   border-radius: 0.2em;
   padding: 0.2em 0.5em;
   font-size: 2em;
@@ -289,44 +291,17 @@ a:visited {
   position: relative;
 }
 
-/*Cross Btn styles*/
-.crossWrapper {
-  position: absolute;
-  top: -23%;
-  right: 0;
-  opacity: 1;
-  transition: opacity 0.5s;
-  user-select: none;
-  pointer-events: auto ;
-}
-
-.crossBtn {
-  font-size: 4em;
-  z-index: 3;
-}
-
-.crossWrapper.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
 /*Delete btn and option*/
 .deleteBtn-Cont {
   opacity: 1;
   transition: 0.3s ease-in-out;
-  pointer-events: auto ;
   user-select: none;
 }
 
-.deleteBtn-Cont.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-
+.sort-cont,
 .delete-btn {
   font-size: 2em;
-  position :relative;
+  position: relative;
   padding: 0.3em 0.5em;
   border: 2px solid white;
   transition: 0.1s ease-in-out;
@@ -340,4 +315,25 @@ a:visited {
 
 .delete-list {
   height: 4em;
+}
+
+/*Cross Btn styles*/
+.crossWrapper {
+  position: absolute;
+  top: -23%;
+  right: 0;
+  opacity: 1;
+  transition: opacity 0.5s;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.crossBtn {
+  font-size: 4em;
+  z-index: 3;
+}
+
+.crossWrapper.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
