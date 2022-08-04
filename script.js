@@ -50,7 +50,7 @@ class Cycling extends Workout {
 
   calcSpeed() {
     //	km/h
-    this.speed = this.duration / (this.distance / 60);
+    this.speed = this.distance / (this.duration / 60);
     return this.speed
   }
 }
@@ -77,6 +77,8 @@ class App {
   #html;
   #map;
   #mapEvent;
+  #marker;
+  #markers;
   #workouts = [];
   #mapZoomLevel = 13;
   constructor() {
@@ -94,8 +96,10 @@ class App {
     btnsCont.addEventListener('click', this._openList)
     sortList.addEventListener('click', this._getOptionType.bind(this));
     deleteList.addEventListener('click', this._getOptionType.bind(this));
+    
     //get workout from local storage
     this._getLocalStorage();
+    
   }
 
   _getPosition() {
@@ -106,7 +110,7 @@ class App {
       })
     }
   }
-
+  
   _loadMap(position) {
     const { latitude } = position.coords;
     const { longitude } = position.coords;
@@ -115,6 +119,12 @@ class App {
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(this.#map);
+    
+  /*  this.#markers = L.layerGroup();
+    this.#marker = L.marker(coords);
+    this.#markers.addLayer(this.#marker);
+    console.log(this.#marker); */
+    
 
     //click event on map
     this.#map.on('click', this._showForm.bind(this));
@@ -125,7 +135,6 @@ class App {
 
   _showForm(mapE) {
     this.#mapEvent = mapE;
-
     //remove class	
     form.classList.remove('hidden');
     inputDistance.focus();
@@ -181,6 +190,7 @@ class App {
 
 
     //add new object to workout arrray;
+ 
     this.#workouts.push(workout);
 
     //Render workout as an marker on map		
@@ -268,6 +278,10 @@ class App {
     }
 
     form.insertAdjacentHTML('afterend', this.#html);
+   
+   //cross delete btn
+    const crossBtn = document.querySelector('.crossBtn');
+    crossBtn.addEventListener('click', this._crossDeleteBtn.bind(this));
   }
 
   _moveToMap(e) {
@@ -296,14 +310,24 @@ class App {
     const data = JSON.parse(localStorage.getItem('workouts'));
   
     if (!data) return;
-  
+    
+    //Added by GitHub@Suhail-007
+    //setting prototype 
+    data.forEach(item => {
+      if (item.type === 'running') item.__proto__ = Running.prototype;
+      
+      if(item.type === 'cycling') item.__proto__ = Cycling.prototype;
+    }) 
+    
+    //Added by GitHub@Suhail-007
+    
     this.#workouts = data;
-  
     this.#workouts.forEach(work => this._renderWorkout(work));
   }
   
   reset() {
     localStorage.removeItem('workouts');
+    location.reload();
   }
 
   //Added by github@suhail-007
@@ -395,7 +419,6 @@ class App {
     const formList = document.querySelectorAll('.workout');
     const crossBtnWrapper = document.querySelectorAll('.crossWrapper');
     
-    console.log(elemId);
     if (elemId === 'delete') {
       
       crossBtnWrapper.forEach(btn => btn.classList.remove('hidden'));
@@ -412,7 +435,30 @@ class App {
     deleteList.classList.add('hidden');
   }
   
-  //Added by github@suhail-007
+  _crossDeleteBtn(e) {
+  const formList = Array.from(document.querySelectorAll('.workout')); 
+  const elem = e.target.closest('.workout').dataset.id;
+  
+   if(elem) {
+     formList.forEach(li => {
+       if (elem === li.dataset.id) li.remove();
+      });
+      
+      this.#workouts.filter((work, i) => {
+        if (work.id === elem) {
+          this.#workouts.splice(i, 1);
+        }
+      });
+      
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+      
+      if (this.#workouts.length === 0) {
+        this.reset();
+        btnsCont.classList.add('hidden');
+      }
+    }
+  }
+//Added by github@suhail-007
 }
 
 //class instance

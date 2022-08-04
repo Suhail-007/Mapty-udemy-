@@ -328,11 +328,11 @@ a:visited {
   transition: opacity 0.5s;
   user-select: none;
   pointer-events: auto;
+  z-index: 4;
 }
 
 .crossBtn {
-  font-size: 4em;
-  z-index: 3;
+  font-size: 5em;
 }
 
 .crossWrapper.hidden {
