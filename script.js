@@ -82,10 +82,10 @@ class App {
   #markers;
   #workouts = [];
   #mapZoomLevel = 13;
-  
+
   #editFlag = false;
   #editId;
-  
+
   constructor() {
 
     //get position
@@ -124,25 +124,25 @@ class App {
   }
 
   _loadMap(position) {
-      const { latitude } = position.coords;
-      const { longitude } = position.coords;
-      const coords = [latitude, longitude];
-      this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
-      L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-        attribution: '&c; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(this.#map);
+    const { latitude } = position.coords;
+    const { longitude } = position.coords;
+    const coords = [latitude, longitude];
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+      attribution: '&c; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(this.#map);
 
-      /*  this.#markers = L.layerGroup();
-        this.#marker = L.marker(coords);
-        this.#markers.addLayer(this.#marker);
-        console.log(this.#marker); */
+    /*  this.#markers = L.layerGroup();
+      this.#marker = L.marker(coords);
+      this.#markers.addLayer(this.#marker);
+      console.log(this.#marker); */
 
 
-      //click event on map
-      this.#map.on('click', this._showForm.bind(this));
+    //click event on map
+    this.#map.on('click', this._showForm.bind(this));
 
-      //render marker from localStorage
-      this.#workouts.forEach(work => this._renderWorkoutMarker(work));
+    //render marker from localStorage
+    this.#workouts.forEach(work => this._renderWorkoutMarker(work));
   }
 
   _showForm(mapE) {
@@ -158,93 +158,92 @@ class App {
   _hideForm() {
     //clear values
     this._resetValues();
-    
+
     form.style.display = 'none';
     form.classList.add('hidden');
     setTimeout(() => form.style.display = 'grid', 1000);
   }
 
   _toggleElevationField() {
-  
-  inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
-  inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
-   
+
+    inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+    inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+
   }
 
   _newWorkout(e) {
     e.preventDefault();
-    
+
     if (!this.#editFlag) {
-          //helper	functions	
-    const validInput = (...input) => input.every(inp => Number.isFinite(inp));
-    const allPositive = (...input) => input.every(inp => inp > 0);
+      //helper	functions	
+      const validInput = (...input) => input.every(inp => Number.isFinite(inp));
+      const allPositive = (...input) => input.every(inp => inp > 0);
 
-    //get data from form		
-    const type = inputType.value;
-    const distance = +inputDistance.value;
-    const duration = +inputDuration.value;
-    const { lat, lng } = this.#mapEvent.latlng;
-    let workout;
+      //get data from form		
+      const type = inputType.value;
+      const distance = +inputDistance.value;
+      const duration = +inputDuration.value;
+      const { lat, lng } = this.#mapEvent.latlng;
+      let workout;
 
-    //if workout running, create running obj		
-    if (type === 'running') {
-      const cadence = +inputCadence.value;
+      //if workout running, create running obj		
+      if (type === 'running') {
+        const cadence = +inputCadence.value;
 
-      //check if data is valid		
-      if (!validInput(distance, duration, cadence) || !allPositive(distance, duration, cadence)) return alert('input have to be positive numbers');
-      workout = new Running([lat, lng], distance, duration, cadence);
-    }
+        //check if data is valid		
+        if (!validInput(distance, duration, cadence) || !allPositive(distance, duration, cadence)) return alert('input have to be positive numbers');
+        workout = new Running([lat, lng], distance, duration, cadence);
+      }
 
-    //if workout cycling, create cycling obj		
-    if (type === 'cycling') {
-      const elevation = +inputElevation.value;
+      //if workout cycling, create cycling obj		
+      if (type === 'cycling') {
+        const elevation = +inputElevation.value;
 
-      //check if data is valid		
-      if (!validInput(distance, duration, elevation) || !allPositive(distance, duration)) return alert('distance and duration have to be positive numbers');
-      workout = new Cycling([lat, lng], distance, duration, elevation);
-    }
+        //check if data is valid		
+        if (!validInput(distance, duration, elevation) || !allPositive(distance, duration)) return alert('distance and duration have to be positive numbers');
+        workout = new Cycling([lat, lng], distance, duration, elevation);
+      }
 
 
-    //add new object to workout arrray;
+      //add new object to workout arrray;
 
-    this.#workouts.push(workout);
+      this.#workouts.push(workout);
 
-    //Render workout as an marker on map		
-    this._renderWorkoutMarker(workout);
+      //Render workout as an marker on map		
+      this._renderWorkoutMarker(workout);
 
-    //Render workout as a list
-    this._renderWorkout(workout);
+      //Render workout as a list
+      this._renderWorkout(workout);
 
-    //Hide the form + clear the input fields		
-    this._hideForm();
+      //Hide the form + clear the input fields		
+      this._hideForm();
 
-    //set local storage
-    this._setLocalStorage();
-    
-    } else if(this.#editFlag) {
-      const data = JSON.parse(localStorage.getItem('workouts'));
-      
-      this.#workouts.map((work, i) =>  {
+      //set local storage
+      this._setLocalStorage();
+
+    } else if (this.#editFlag) {
+
+      this.#workouts.map((work, i) => {
         if (work.id === this.#editId) {
-         
+
           work.type = inputType.value;
-          
+
           work.distance = inputDistance.value;
           work.duration = inputDuration.value;
-       
-        if (work.type === 'running') {
-         work.cadence = inputCadence.value;
-        }
-        
-        if (work.type === 'cycling') {
-        work.elevationGain = inputElevation.value;
-        }
+
+          if (work.type === 'running') {
+            work.cadence = inputCadence.value;
+          }
+
+          if (work.type === 'cycling') {
+            work.elevationGain = inputElevation.value;
+          }
         }
       })
-      
+
       //overwrite local storage
       localStorage.setItem('workouts', JSON.stringify(this.#workouts));
-      
+
       //reload the page
       location.reload();
     }
@@ -266,7 +265,7 @@ class App {
   }
 
   _renderWorkout(workout) {
-   
+
     this.#html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
     
@@ -378,9 +377,9 @@ class App {
 
   //Added by github@suhail-007
   _resetValues() {
-     inputDistance.value = inputDuration.value = inputElevation.value = inputCadence.value = '';
+    inputDistance.value = inputDuration.value = inputElevation.value = inputCadence.value = '';
   }
-  
+
   _getOptionType(e) {
 
     if (e.target.parentElement.matches('.delete-list')) {
@@ -508,34 +507,33 @@ class App {
         btnsCont.classList.add('hidden');
       }
     }
-    
+
     this._resetValues();
   }
-  
+
   _editListItem(e) {
     const elem = e.target.closest('.workout');
     this.#editId = elem.dataset.id;
-    
-    const formList = document.querySelectorAll('.workout');
 
     this.#workouts.forEach(work => {
       if (work.id === this.#editId) {
-        
+
         inputType.value = work.type;
         inputDistance.value = work.distance;
         inputDuration.value = work.duration;
-        
+
         if (work.type === 'running') {
-         inputCadence.value = work.cadence;
-         this._toggleElevationField()
+          inputCadence.value = work.cadence;
+          if (inputCadence.closest('.form__row').classList.contains('form__row--hidden')) this._toggleElevationField();
         }
-        
+
         if (work.type === 'cycling') {
-         inputElevation.value = work.elevationGain;
-         this._toggleElevationField()
+          inputElevation.value = work.elevationGain;
+          this._toggleElevationField();
         }
       }
     })
+
     this._showForm();
     this.#editFlag = true
   }
