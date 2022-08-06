@@ -65,6 +65,7 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+
 const btnsCont = document.querySelector('#btns');
 const sortBtn = document.querySelector('[data-sortCont]');
 const sortList = document.querySelector('[data-sortList]');
@@ -81,6 +82,10 @@ class App {
   #markers;
   #workouts = [];
   #mapZoomLevel = 13;
+  
+  #editFlag = false;
+  #editId;
+  
   constructor() {
 
     //get position
@@ -93,13 +98,20 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToMap.bind(this));
+
+    //Added by github@suhail-007
+    //edit list item 
+    containerWorkouts.addEventListener('dblclick', this._editListItem.bind(this));
+
     btnsCont.addEventListener('click', this._openList)
     sortList.addEventListener('click', this._getOptionType.bind(this));
     deleteList.addEventListener('click', this._getOptionType.bind(this));
-    
+
+    //Added by github@suhail-007   
+
     //get workout from local storage
     this._getLocalStorage();
-    
+
   }
 
   _getPosition() {
@@ -110,27 +122,27 @@ class App {
       })
     }
   }
-  
+
   _loadMap(position) {
-    const { latitude } = position.coords;
-    const { longitude } = position.coords;
-    const coords = [latitude, longitude];
-    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
-    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(this.#map);
-    
-  /*  this.#markers = L.layerGroup();
-    this.#marker = L.marker(coords);
-    this.#markers.addLayer(this.#marker);
-    console.log(this.#marker); */
-    
+      const { latitude } = position.coords;
+      const { longitude } = position.coords;
+      const coords = [latitude, longitude];
+      this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
+      L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        attribution: '&c; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(this.#map);
 
-    //click event on map
-    this.#map.on('click', this._showForm.bind(this));
+      /*  this.#markers = L.layerGroup();
+        this.#marker = L.marker(coords);
+        this.#markers.addLayer(this.#marker);
+        console.log(this.#marker); */
 
-    //render marker from localStorage
-    this.#workouts.forEach(work => this._renderWorkoutMarker(work));
+
+      //click event on map
+      this.#map.on('click', this._showForm.bind(this));
+
+      //render marker from localStorage
+      this.#workouts.forEach(work => this._renderWorkoutMarker(work));
   }
 
   _showForm(mapE) {
@@ -138,26 +150,32 @@ class App {
     //remove class	
     form.classList.remove('hidden');
     inputDistance.focus();
-    
+
     //Added by GitHub@suhail-007
     btnsCont.classList.remove('hidden');
   }
 
   _hideForm() {
-    inputDistance.value = inputDuration.value = inputElevation.value = inputCadence.value = '';
-
+    //clear values
+    this._resetValues();
+    
     form.style.display = 'none';
     form.classList.add('hidden');
     setTimeout(() => form.style.display = 'grid', 1000);
   }
 
   _toggleElevationField() {
-    inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
-    inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+  
+  inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+  inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+   
   }
 
   _newWorkout(e) {
-    //helper	functions	
+    e.preventDefault();
+    
+    if (!this.#editFlag) {
+          //helper	functions	
     const validInput = (...input) => input.every(inp => Number.isFinite(inp));
     const allPositive = (...input) => input.every(inp => inp > 0);
 
@@ -167,8 +185,6 @@ class App {
     const duration = +inputDuration.value;
     const { lat, lng } = this.#mapEvent.latlng;
     let workout;
-
-    e.preventDefault();
 
     //if workout running, create running obj		
     if (type === 'running') {
@@ -190,7 +206,7 @@ class App {
 
 
     //add new object to workout arrray;
- 
+
     this.#workouts.push(workout);
 
     //Render workout as an marker on map		
@@ -204,10 +220,40 @@ class App {
 
     //set local storage
     this._setLocalStorage();
+    
+    } else if(this.#editFlag) {
+      const data = JSON.parse(localStorage.getItem('workouts'));
+      
+      this.#workouts.map((work, i) =>  {
+        if (work.id === this.#editId) {
+         
+          work.type = inputType.value;
+          
+          work.distance = inputDistance.value;
+          work.duration = inputDuration.value;
+       
+        if (work.type === 'running') {
+         work.cadence = inputCadence.value;
+        }
+        
+        if (work.type === 'cycling') {
+        work.elevationGain = inputElevation.value;
+        }
+        }
+      })
+      
+      //overwrite local storage
+      localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+      
+      //reload the page
+      location.reload();
+    }
   }
 
   _renderWorkoutMarker(workout) {
-    L.marker(workout.coords).addTo(this.#map)
+    L.marker(workout.coords, {
+        draggable: true,
+      }).addTo(this.#map)
       .bindPopup(L.popup({
         maxWidth: 200,
         minWidth: 50,
@@ -220,8 +266,8 @@ class App {
   }
 
   _renderWorkout(workout) {
+   
     this.#html = `
-    
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
     
     <!----Added by github@suhail-007---->
@@ -235,12 +281,12 @@ class App {
       <h2 class="workout__title">${workout.description}</h2>
       <div class="workout__details">
         <span class="workout__icon">${workout.type === 'running' ? '🏃' : '🚴'}</span>
-        <span class="workout__value">${workout.distance}</span>
+        <span class="workout__value distance">${workout.distance}</span>
         <span class="workout__unit">km</span>
       </div>
       <div class="workout__details">
         <span class="workout__icon">⏱</span>
-        <span class="workout__value">${workout.duration}</span>
+        <span class="workout__value duration">${workout.duration}</span>
         <span class="workout__unit">min</span>
       </div>
     `
@@ -249,12 +295,12 @@ class App {
       this.#html += `
         <div class="workout__details">
           <span class="workout__icon">⚡️</span>
-          <span class="workout__value">${workout.pace.toFixed(1)}</span>
+          <span class="workout__value pace">${workout.pace.toFixed(1)}</span>
           <span class="workout__unit">min/km</span>
         </div>
         <div class="workout__details">
           <span class="workout__icon">🦶🏼</span>
-          <span class="workout__value">${workout.cadence}</span>
+          <span class="workout__value cadence">${workout.cadence}</span>
           <span class="workout__unit">spm</span>
         </div>
       </li>
@@ -265,12 +311,12 @@ class App {
       this.#html += `
         <div class="workout__details">
           <span class="workout__icon">⚡️</span>
-          <span class="workout__value">${workout.speed.toFixed(1)}</span>
+          <span class="workout__value speed">${workout.speed.toFixed(1)}</span>
           <span class="workout__unit">km/h</span>
         </div>
         <div class="workout__details">
           <span class="workout__icon">⛰</span>
-          <span class="workout__value">${workout.elevationGain}</span>
+          <span class="workout__value elevation">${workout.elevationGain}</span>
           <span class="workout__unit">m</span>
         </div>
       </li>
@@ -278,8 +324,8 @@ class App {
     }
 
     form.insertAdjacentHTML('afterend', this.#html);
-   
-   //cross delete btn
+
+    //cross delete btn
     const crossBtn = document.querySelector('.crossBtn');
     crossBtn.addEventListener('click', this._crossDeleteBtn.bind(this));
   }
@@ -301,59 +347,63 @@ class App {
     })
     //    workout.click();
   }
-  
+
   _setLocalStorage() {
-    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+    return localStorage.setItem('workouts', JSON.stringify(this.#workouts));
   }
-  
+
   _getLocalStorage() {
     const data = JSON.parse(localStorage.getItem('workouts'));
-  
+
     if (!data) return;
-    
+
     //Added by GitHub@Suhail-007
     //setting prototype 
     data.forEach(item => {
       if (item.type === 'running') item.__proto__ = Running.prototype;
-      
-      if(item.type === 'cycling') item.__proto__ = Cycling.prototype;
-    }) 
-    
+
+      if (item.type === 'cycling') item.__proto__ = Cycling.prototype;
+    })
+
     //Added by GitHub@Suhail-007
-    
+
     this.#workouts = data;
     this.#workouts.forEach(work => this._renderWorkout(work));
   }
-  
+
   reset() {
     localStorage.removeItem('workouts');
     location.reload();
   }
 
   //Added by github@suhail-007
+  _resetValues() {
+     inputDistance.value = inputDuration.value = inputElevation.value = inputCadence.value = '';
+  }
+  
   _getOptionType(e) {
-   
-  if(e.target.parentElement.matches('.delete-list')) {
-    this.#elemId = e.target.id;
-    this._showDeleteBtns(this.#elemId);
-  }
-  
-  if(e.target.parentElement.matches('.sort-list')) {
-    this.#elemId = e.target.id;
-    this._sortWorkoutList(this.#elemId);
-  }
-  
+
+    if (e.target.parentElement.matches('.delete-list')) {
+      this.#elemId = e.target.id;
+      this._deleteWorkouts(this.#elemId);
+    }
+
+    if (e.target.parentElement.matches('.sort-list')) {
+      this.#elemId = e.target.id;
+      this._deleteWorkouts(this.#elemId);
+    }
+
   }
 
   _sortWorkoutList(elemId) {
     const formList = document.querySelectorAll('.workout');
     let sortedArr;
-    
+
     if (!elemId) return
-    
+
     //default order of the list
     if (elemId === 'default') sortedArr = this.#workouts.slice();
-    
+
     //alphabetical order
     if (elemId === 'alphabetically') {
       sortedArr = this.#workouts.slice().sort((a, b) => {
@@ -364,7 +414,7 @@ class App {
         if (nameA < nameB) return 1;
       })
     }
-    
+
     // duration in ascending order
     if (elemId === 'duration') {
       sortedArr = this.#workouts.slice().sort((a, b) => {
@@ -372,7 +422,7 @@ class App {
         if (a.duration < b.duration) return 1;
       })
     }
-    
+
     //distance in ascending order
     if (elemId === 'distance') {
       sortedArr = this.#workouts.slice().sort((a, b) => {
@@ -383,19 +433,19 @@ class App {
 
     //render sorted array on form
     sortedArr.forEach(work => this._renderWorkout(work));
-    
+
     //clear the form
     formList.forEach(li => li.style.display = li.remove());
 
     //hide btn as soon as user click on any sort option
     sortList.classList.add('hidden');
-    
+
     //this will preserve the animation
     setTimeout(function() {
       sortList.style.display = 'flex';
     }, 500);
   }
-  
+
   _showBtns() {
     const data = JSON.parse(localStorage.getItem('workouts'));
     if (!data) return
@@ -403,27 +453,27 @@ class App {
   }
 
   _openList(e) {
-   let listOptions;
-   
-    const btn = e.target.dataset.sortcont === 'sort-list' ? e.target.dataset.sortcont :  e.target.dataset.deletebtn;
-    
+    let listOptions;
+
+    const btn = e.target.dataset.sortcont === 'sort-list' ? e.target.dataset.sortcont : e.target.dataset.deletebtn;
+
     if (!btn) return;
-    
+
     if (btn) {
       listOptions = document.querySelector(`.${btn}`);
       listOptions.classList.toggle('hidden');
     }
   }
-  
-  _showDeleteBtns(elemId) {
+
+  _deleteWorkouts(elemId) {
     const formList = document.querySelectorAll('.workout');
     const crossBtnWrapper = document.querySelectorAll('.crossWrapper');
-    
+
     if (elemId === 'delete') {
-      
+
       crossBtnWrapper.forEach(btn => btn.classList.remove('hidden'));
-   }
-    
+    }
+
     if (elemId === 'deleteAll') {
       //clear local storage
       this.reset()
@@ -431,34 +481,67 @@ class App {
       formList.forEach(li => li.style.display = li.remove());
       btnsCont.classList.add('hidden');
     }
-    
+
     deleteList.classList.add('hidden');
+    this._resetValues();
   }
-  
+
   _crossDeleteBtn(e) {
-  const formList = Array.from(document.querySelectorAll('.workout')); 
-  const elem = e.target.closest('.workout').dataset.id;
-  
-   if(elem) {
-     formList.forEach(li => {
-       if (elem === li.dataset.id) li.remove();
+    const formList = Array.from(document.querySelectorAll('.workout'));
+    const elem = e.target.closest('.workout').dataset.id;
+
+    if (elem) {
+      formList.forEach(li => {
+        if (elem === li.dataset.id) li.remove();
       });
-      
+
       this.#workouts.filter((work, i) => {
         if (work.id === elem) {
           this.#workouts.splice(i, 1);
         }
       });
-      
-    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
-      
+
+      localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+
       if (this.#workouts.length === 0) {
         this.reset();
         btnsCont.classList.add('hidden');
       }
     }
+    
+    this._resetValues();
   }
-//Added by github@suhail-007
+  
+  _editListItem(e) {
+    const elem = e.target.closest('.workout');
+    this.#editId = elem.dataset.id;
+    
+    const formList = document.querySelectorAll('.workout');
+
+    this.#workouts.forEach(work => {
+      if (work.id === this.#editId) {
+        
+        inputType.value = work.type;
+        inputDistance.value = work.distance;
+        inputDuration.value = work.duration;
+        
+        if (work.type === 'running') {
+         inputCadence.value = work.cadence;
+         this._toggleElevationField()
+        }
+        
+        if (work.type === 'cycling') {
+         inputElevation.value = work.elevationGain;
+         this._toggleElevationField()
+        }
+      }
+    })
+    this._showForm();
+    this.#editFlag = true
+  }
+
+
+  //Added by github@suhail-007
 }
 
 //class instance
