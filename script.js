@@ -99,7 +99,7 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToMap.bind(this));
 
-    //Added by github@suhail-007
+    //Added by suhail-007@github
     //edit list item 
     containerWorkouts.addEventListener('dblclick', this._editListItem.bind(this));
 
@@ -107,7 +107,7 @@ class App {
     sortList.addEventListener('click', this._getOptionType.bind(this));
     deleteList.addEventListener('click', this._getOptionType.bind(this));
 
-    //Added by github@suhail-007   
+    //Added by suhail-007@github   
 
     //get workout from local storage
     this._getLocalStorage();
@@ -151,7 +151,7 @@ class App {
     form.classList.remove('hidden');
     inputDistance.focus();
 
-    //Added by GitHub@suhail-007
+    //Added by suhail-007@github
     btnsCont.classList.remove('hidden');
   }
 
@@ -269,13 +269,13 @@ class App {
     this.#html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
     
-    <!----Added by github@suhail-007---->
+    <!----Added by suhail-007@github---->
     
       <div class="crossWrapper hidden">
         <div class="crossBtn">×</div>
       </div>
   
-    <!----Added by github@suhail-007----> 
+    <!----Added by suhail-007@github----> 
      
       <h2 class="workout__title">${workout.description}</h2>
       <div class="workout__details">
@@ -356,7 +356,7 @@ class App {
 
     if (!data) return;
 
-    //Added by GitHub@Suhail-007
+    //Added by suhail-007@github
     //setting prototype 
     data.forEach(item => {
       if (item.type === 'running') item.__proto__ = Running.prototype;
@@ -364,7 +364,7 @@ class App {
       if (item.type === 'cycling') item.__proto__ = Cycling.prototype;
     })
 
-    //Added by GitHub@Suhail-007
+    //Added by suhail-007@github
 
     this.#workouts = data;
     this.#workouts.forEach(work => this._renderWorkout(work));
@@ -375,7 +375,7 @@ class App {
     location.reload();
   }
 
-  //Added by github@suhail-007
+  //Added by suhail-007@github
   _resetValues() {
     inputDistance.value = inputDuration.value = inputElevation.value = inputCadence.value = '';
   }
@@ -389,7 +389,7 @@ class App {
 
     if (e.target.parentElement.matches('.sort-list')) {
       this.#elemId = e.target.id;
-      this._deleteWorkouts(this.#elemId);
+      this._sortWorkoutList(this.#elemId);
     }
 
   }
@@ -539,7 +539,7 @@ class App {
   }
 
 
-  //Added by github@suhail-007
+  //Added by suhail-007@github
 }
 
 //class instance
