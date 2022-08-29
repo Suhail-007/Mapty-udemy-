@@ -544,3 +544,8 @@ class App {
 
 //class instance
 const app = new App();
+
+
+import cloneDeep from './node_modules/lodash-es/cloneDeep.js'
+
+console.log(cloneDeep);
