@@ -541,3 +541,5 @@ class App {
 
   //Added by suhail-007@github
 }
+
+const app = new App()
